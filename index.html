@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="author" content="Jakes Schoeman">
+<title>Sanlam — Financial Services Knowledge Sphere</title>
+<!--
+  Knowledge Graph Technology — Proprietary concept and implementation.
+  Developed by Jakes Schoeman. All rights reserved.
+  Unauthorised reproduction or reuse prohibited.
+-->
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #fff; font-family: 'Open Sans', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
+
+  #header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    background: #fff; border-bottom: 1px solid #e8e8e0;
+    height: 52px; display: flex; align-items: center;
+  }
+  #change-path {
+    flex-shrink: 0; padding: 0 14px; height: 100%;
+    display: flex; align-items: center;
+    font-size: 11px; font-weight: 800; color: #0075C9;
+    cursor: pointer; border-left: 1px solid #eee;
+    white-space: nowrap; font-family: 'Open Sans', sans-serif;
+    transition: background 0.15s;
+  }
+  #change-path:hover { background: rgba(0,117,201,0.07); }
+
+  #logo-pin {
+    flex-shrink: 0; padding: 0 16px;
+    display: flex; align-items: center;
+    border-right: 1px solid #eee; height: 100%;
+  }
+
+  #nav-wrap {
+    flex: 1; min-width: 0; position: relative; height: 100%; overflow: hidden;
+  }
+  #nav-wrap::after {
+    content: ''; pointer-events: none;
+    position: absolute; top: 0; right: 0; width: 40px; height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,1));
+    z-index: 1;
+  }
+  #nav-bar {
+    display: flex; align-items: center; gap: 6px; padding: 0 12px;
+    overflow-x: scroll; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    touch-action: pan-x; cursor: grab; height: 100%; width: 100%;
+  }
+  #nav-bar::-webkit-scrollbar { display: none; }
+  #nav-bar:active { cursor: grabbing; }
+
+  .nav-pill {
+    flex-shrink: 0; cursor: pointer; white-space: nowrap;
+    font-family: 'Open Sans', sans-serif; font-size: 10px; font-weight: 800;
+    padding: 4px 12px; border-radius: 20px; border: 1.5px solid transparent;
+    transition: all 0.18s ease; letter-spacing: 0.1px; user-select: none;
+  }
+  .nav-pill.all { background: #f0f0f0; color: #666; border-color: #ddd; }
+  .nav-pill.all.active, .nav-pill.all:hover { background: #333; color: #fff; border-color: #333; }
+
+  .nav-pill.path { font-size: 11px; font-weight: 800; padding: 4px 13px; background: #f7f7f7; color: #333; border-color: #ddd; }
+  .nav-pill.path:hover:not(.active) { background: #eee; border-color: #bbb; }
+  .nav-pill.path.active { color: #fff; border-color: transparent; box-shadow: 0 2px 10px rgba(0,0,0,0.20); }
+  .nav-pill.path[data-path="protect"].active  { background: #0075C9; color: #012F6B; }
+  .nav-pill.path[data-path="grow"].active     { background: #0151A3; }
+  .nav-pill.path[data-path="business"].active { background: #0260B8; }
+  .nav-pill.path[data-path="starting"].active  { background: #0063AC; color: #012F6B; }
+  .nav-pill.path[data-path="retire"].active { background: #012F6B; }
+
+  .nav-pill.a { background: rgba(0,117,201,0.10); color: #0151A3; border-color: rgba(0,117,201,0.45); }
+  .nav-pill.a.active { background: #0075C9; color: #012F6B; border-color: #0075C9; box-shadow: 0 2px 10px rgba(0,117,201,0.40); }
+  .nav-pill.a:hover:not(.active) { background: rgba(0,117,201,0.20); }
+
+  .nav-pill.b { background: rgba(1,81,163,0.07); color: #0151A3; border-color: rgba(1,81,163,0.28); }
+  .nav-pill.b.active { background: #0151A3; color: #fff; border-color: #0151A3; box-shadow: 0 2px 10px rgba(1,81,163,0.35); }
+  .nav-pill.b:hover:not(.active) { background: rgba(1,81,163,0.13); }
+
+  .nav-divider { flex-shrink: 0; width: 1px; height: 20px; background: #ddd; margin: 0 4px; }
+
+  .nav-cta {
+    flex-shrink: 0; cursor: pointer; white-space: nowrap;
+    font-family: 'Open Sans', sans-serif; font-size: 10px; font-weight: 800;
+    padding: 5px 14px; border-radius: 20px; letter-spacing: 0.1px; user-select: none;
+    background: #0075C9; color: #012F6B; border: none; transition: all 0.18s ease;
+  }
+  .nav-cta:hover { background: #0063AC; }
+
+  #bottom-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+    background: rgba(255,255,255,0.96); border-top: 1px solid #e8e8e0;
+    height: 44px; display: flex; align-items: center;
+    backdrop-filter: blur(8px);
+  }
+  #bottom-scroll {
+    display: flex; align-items: center; gap: 6px; padding: 0 14px;
+    overflow-x: scroll; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    touch-action: pan-x; height: 100%; width: 100%;
+  }
+  #bottom-scroll::-webkit-scrollbar { display: none; }
+  #canvas-container { bottom: 44px; }
+
+  #canvas-container { position: fixed; top: 88px; left: 0; right: 0; bottom: 0; cursor: grab; }
+
+  .node-label {
+    font-family: 'Open Sans', sans-serif; font-size: 11px; font-weight: 800;
+    padding: 3px 10px; border-radius: 20px;
+    white-space: nowrap; transition: opacity 0.25s; letter-spacing: 0.1px;
+    pointer-events: auto; cursor: pointer;
+    will-change: transform;
+  }
+  .node-label.hub-a   { color: #2a4e00; background: rgba(255,255,255,0.95); border: 1.5px solid rgba(0,117,201,0.70); box-shadow: 0 2px 6px rgba(0,0,0,0.10); }
+  .node-label.hub-b   { color: #012F6B; background: rgba(255,255,255,0.95); border: 1.5px solid rgba(1,81,163,0.55); box-shadow: 0 2px 6px rgba(0,0,0,0.10); }
+  .node-label.child-a { font-size: 9px; font-weight: 700; color: #0151A3; background: rgba(255,255,255,0.88); border: 1px solid rgba(0,117,201,0.35); padding: 1px 7px; }
+  .node-label.child-b { font-size: 9px; font-weight: 700; color: #0151A3; background: rgba(255,255,255,0.88); border: 1px solid rgba(1,81,163,0.28); padding: 1px 7px; }
+
+  #mini-tip {
+    position: fixed; display: none; z-index: 500;
+    background: #1a2e00; border-radius: 14px; padding: 0;
+    width: 300px; pointer-events: auto; cursor: default;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.50), 0 0 0 1px rgba(0,117,201,0.35);
+    overflow: hidden;
+  }
+  #mini-tip.visible { display: block; animation: tipIn 0.18s ease; }
+  @keyframes tipIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+  #mt-content { padding: 14px 16px; }
+  #mt-label  { font-size: 12px; font-weight: 800; color: #5BB8FF; margin-bottom: 5px; font-family: 'Open Sans', sans-serif; }
+  #mt-body   { font-size: 11px; color: rgba(255,255,255,0.82); line-height: 1.6; }
+  #mt-action { font-size: 10px; color: #c8f040; margin-top: 8px; font-weight: 800; cursor: pointer; }
+  #mt-close  { position: absolute; top: 8px; right: 10px; color: rgba(255,255,255,0.5); font-size: 16px; cursor: pointer; line-height: 1; z-index: 1; }
+
+  #controls {
+    position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px; z-index: 100; pointer-events: none;
+  }
+  .ctrl {
+    background: rgba(255,255,255,0.92); border: 1px solid #e0e0e0; border-radius: 20px;
+    padding: 5px 12px; display: flex; align-items: center; gap: 6px;
+    font-family: 'Open Sans', sans-serif; font-size: 10px; font-weight: 700;
+    color: #555; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .ctrl-icon { font-size: 13px; line-height: 1; }
+  .ctrl-dot-a { width: 10px; height: 10px; border-radius: 50%; background: #0075C9; display: inline-block; flex-shrink: 0; }
+  .ctrl-dot-b { width: 10px; height: 10px; border-radius: 50%; background: #0151A3; display: inline-block; flex-shrink: 0; margin-left: -4px; }
+
+  @media (max-width: 600px) {
+    #controls { gap: 3px; bottom: 14px; }
+    .ctrl { font-size: 9px; padding: 4px 7px; gap: 3px; }
+    .ctrl-long { display: none; }
+    #logo-pin { padding: 0 8px; }
+    #logo-pin .logo-text { font-size: 18px; }
+    .node-label.child-a, .node-label.child-b { display: none; }
+    #content-panel { width: 100%; top: 52px; bottom: 44px; }
+  }
+
+  /* ── Nav pill spotlight carousel ── */
+  .nav-pill.path.spotlight {
+    background: rgba(248,158,52,0.14) !important;
+    border-color: rgba(248,158,52,0.65) !important;
+    color: #7A4A00 !important;
+    box-shadow: 0 0 0 2.5px rgba(248,158,52,0.45), 0 4px 16px rgba(248,158,52,0.25) !important;
+    transform: scale(1.07);
+  }
+
+  #path-guide {
+    display: none;
+    position: fixed; bottom: 54px; left: 20px; z-index: 300;
+    background: rgba(20,40,10,0.94); border-radius: 18px;
+    padding: 14px 20px; min-width: 280px; max-width: 360px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.40);
+    border: 1.5px solid rgba(0,117,201,0.20);
+    text-align: center;
+  }
+  #path-guide.visible { display: block; animation: tipIn 0.3s ease; }
+  #pg-exit { position: absolute; top: 10px; right: 14px; font-size: 10px; color: rgba(255,255,255,0.35); cursor: pointer; font-weight: 700; }
+  #pg-exit:hover { color: rgba(255,255,255,0.7); }
+  #pg-label { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--path-color, #0075C9); margin-bottom: 6px; font-family: 'Open Sans', sans-serif; }
+  #pg-step  { font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 10px; font-family: 'Open Sans', sans-serif; line-height: 1.3; }
+  #pg-dots  { display: flex; gap: 6px; justify-content: center; margin-bottom: 12px; }
+  .pg-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.20); transition: all 0.2s; }
+  .pg-dot.done   { background: var(--path-color, #0075C9); opacity: 0.6; }
+  .pg-dot.active { background: var(--path-color, #0075C9); transform: scale(1.35); }
+  #pg-nav { display: flex; gap: 10px; justify-content: center; }
+  #pg-nav button { font-family: 'Open Sans', sans-serif; font-size: 12px; font-weight: 800; padding: 7px 18px; border-radius: 20px; border: none; cursor: pointer; transition: all 0.15s; }
+  #pg-back { background: rgba(255,255,255,0.10); color: rgba(255,255,255,0.6); }
+  #pg-back:hover { background: rgba(255,255,255,0.18); color: #fff; }
+  #pg-next { background: var(--path-color, #0075C9); color: #012F6B; box-shadow: 0 2px 10px rgba(0,0,0,0.25); }
+  #pg-next:hover { opacity: 0.88; }
+
+
+  #content-panel {
+    position: fixed; top: 88px; right: 0; bottom: 44px;
+    width: 380px; z-index: 300;
+    background: rgba(255,255,255,0.97);
+    border-left: 1px solid #eee;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.08);
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  #content-panel.visible { transform: translateX(0); }
+
+  #cp-resize-handle {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+    cursor: col-resize; z-index: 10; background: transparent; transition: background 0.2s;
+  }
+  #cp-resize-handle:hover, #cp-resize-handle.dragging { background: rgba(0,117,201,0.30); }
+  #cp-resize-handle::after { content: ''; position: absolute; left: 2px; top: 50%; transform: translateY(-50%); width: 2px; height: 32px; border-radius: 2px; background: rgba(0,117,201,0.50); }
+
+  /* ── Path bar (top of content panel when journey active) ── */
+  #cp-path-bar {
+    display: none;
+    position: absolute; top: 0; left: 0; right: 0; height: 46px; z-index: 10;
+    align-items: center; gap: 10px; padding: 0 12px;
+    background: #fff; border-bottom: 2px solid var(--pb-color, #0075C9);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  #cpb-info { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; }
+  #cpb-label { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--pb-color, #0075C9); font-family: 'Open Sans', sans-serif; }
+  #cpb-step  { font-size: 12px; font-weight: 800; color: #222; font-family: 'Open Sans', sans-serif; }
+  #cpb-back, #cpb-next {
+    font-family: 'Open Sans', sans-serif; font-size: 11px; font-weight: 800;
+    padding: 5px 14px; border-radius: 20px; border: none; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+  }
+  #cpb-back { background: #f0f0f0; color: #666; }
+  #cpb-back:hover { background: #e0e0e0; }
+  #cpb-next { background: var(--pb-color, #0075C9); color: var(--pb-text, #012F6B); box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
+  #cpb-next:hover { opacity: 0.88; }
+  #cpb-cta { background: #0075C9; color: #012F6B; font-family: 'Open Sans', sans-serif; font-size: 11px; font-weight: 800; padding: 5px 13px; border-radius: 20px; border: none; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.15s; }
+  #cpb-cta:hover { background: #0063AC; }
+  #cpb-close { background: none; border: none; cursor: pointer; font-size: 18px; color: #aaa; line-height: 1; padding: 4px 6px; flex-shrink: 0; transition: color 0.15s; }
+  #cpb-close:hover { color: #555; }
+
+  body.path-active.panel-open #cp-path-bar { display: flex; }
+  body.path-active.panel-open #cp-inner { top: 46px; }
+  body.panel-open #path-guide { display: none !important; }
+
+  #cp-inner {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 40px;
+    overflow-y: auto; padding: 20px 20px 10px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin; scrollbar-color: #ccc transparent;
+  }
+  #cp-step-badge {
+    display: inline-block; font-size: 10px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px; margin-bottom: 10px;
+    background: rgba(0,117,201,0.14); color: #0151A3;
+    font-family: 'Open Sans', sans-serif;
+  }
+  #cp-title { font-size: 18px; font-weight: 900; color: #1a1a2e; margin-bottom: 8px; line-height: 1.25; font-family: 'Open Sans', sans-serif; }
+  #cp-intro { font-size: 13px; color: #666; line-height: 1.65; margin-bottom: 20px; font-family: 'Open Sans', sans-serif; border-left: 3px solid #0075C9; padding-left: 12px; }
+
+  .cp-card { background: #f9f9f9; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; position: relative; border: 1px solid #f0f0f0; transition: box-shadow 0.15s; }
+  .cp-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .cp-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .cp-card-icon { font-size: 18px; }
+  .cp-card-title { font-size: 13px; font-weight: 800; color: #1a1a2e; font-family: 'Open Sans', sans-serif; }
+  .cp-card-body  { font-size: 12px; color: #555; line-height: 1.65; font-family: 'Open Sans', sans-serif; margin-bottom: 8px; }
+
+  .cp-articles { margin-top: 10px; }
+  .cp-articles-label { font-size: 10px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; font-family: 'Open Sans', sans-serif; }
+  .cp-article-list { list-style: none; padding: 0; margin: 0; }
+  .cp-article-item { display: flex; align-items: baseline; gap: 6px; padding: 4px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+  .cp-article-item:hover .cp-article-title { color: #0151A3; }
+  .cp-article-dot { color: #0075C9; font-size: 14px; flex-shrink: 0; }
+  .cp-article-title { font-size: 12px; color: #444; font-family: 'Open Sans', sans-serif; line-height: 1.4; }
+
+  /* Book a meeting CTA inside panel */
+  .cp-cta-btn {
+    display: inline-block; margin-top: 8px;
+    background: #0075C9; color: #012F6B;
+    font-family: 'Open Sans', sans-serif; font-size: 11px; font-weight: 800;
+    padding: 6px 16px; border-radius: 20px; cursor: pointer; border: none;
+    transition: all 0.15s;
+  }
+  .cp-cta-btn:hover { background: #0063AC; }
+
+  #cp-admin-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 40px; border-top: 1px solid #eee;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; background: #fafafa;
+  }
+  #cp-admin-label { font-size: 11px; color: #aaa; font-family: 'Open Sans', sans-serif; font-weight: 700; }
+  .cp-toggle-wrap { position: relative; display: inline-block; width: 36px; height: 20px; }
+  .cp-toggle-wrap input { opacity: 0; width: 0; height: 0; }
+  .cp-toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #ddd; border-radius: 20px; transition: 0.2s; }
+  .cp-toggle-slider:before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.2s; }
+  .cp-toggle-wrap input:checked + .cp-toggle-slider { background: #0075C9; }
+  .cp-toggle-wrap input:checked + .cp-toggle-slider:before { transform: translateX(16px); }
+
+  @media (max-width: 860px) {
+    #content-panel { width: 100%; top: 52px; bottom: 44px; }
+    #cp-admin-bar { position: sticky; bottom: 0; }
+    #path-guide {
+      left: 0; right: 0; bottom: 44px; border-radius: 0;
+      max-width: 100%; min-width: 100%; box-sizing: border-box; padding: 8px 14px;
+    }
+    #path-guide.visible { display: flex; flex-direction: row; align-items: center; gap: 8px; }
+    #pg-label { display: none; }
+    #pg-dots  { display: none; }
+    #pg-step  { font-size: 12px; margin: 0; flex: 1; line-height: 1.3; }
+    #pg-exit  { position: static; font-size: 10px; flex-shrink: 0; order: -1; }
+    #pg-nav   { flex-direction: row; gap: 6px; margin: 0; flex-shrink: 0; }
+    #pg-nav button { padding: 5px 14px; font-size: 11px; }
+    body.path-active:not(.panel-open) #content-panel { bottom: 96px; }
+  }
+
+  /* ── Mode selector bar ── */
+  #mode-bar {
+    position: fixed; top: 52px; left: 0; right: 0; z-index: 190;
+    height: 36px; background: #fff; border-bottom: 1px solid #e8e8e0;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  .mode-btn {
+    font-family: 'Open Sans', sans-serif; font-size: 10px; font-weight: 800;
+    padding: 4px 14px; border-radius: 20px; border: 1.5px solid #e0e0e0;
+    background: transparent; color: #888; cursor: pointer; letter-spacing: 0.1px;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease; user-select: none;
+  }
+  .mode-btn:hover { background: #f5f5f5; color: #444; }
+  .mode-btn.active { background: rgba(0,117,201,0.12); color: #0151A3; border-color: rgba(0,117,201,0.55); }
+
+  /* Child labels hidden in Navigate and Guide Me modes */
+  body.mode-navigate .node-label.child-a,
+  body.mode-navigate .node-label.child-b,
+  body.mode-guide .node-label.child-a,
+  body.mode-guide .node-label.child-b { display: none; }
+
+  /* Entry-point hub glow in Guide Me mode */
+  @keyframes guidePulse {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(248,158,52,0.5), 0 4px 16px rgba(248,158,52,0.25); border-color: rgba(248,158,52,0.8); }
+    50%       { box-shadow: 0 0 0 5px rgba(248,158,52,0.25), 0 6px 24px rgba(248,158,52,0.40); border-color: rgba(248,158,52,1.0); }
+  }
+  .node-label.guide-entry {
+    animation: guidePulse 1.8s ease-in-out infinite;
+    color: #7A4A00 !important;
+  }
+
+  /* Hide mode bar on mobile — mobile is always Navigate */
+  @media (max-width: 600px) { #mode-bar { display: none; } }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div id="logo-pin">
+    <a href="https://attooh.co.za" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:8px;text-decoration:none;">
+      <span class="logo-text" style="color:#0075C9;font-weight:900" style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:#0075C9;letter-spacing:-0.5px;">Sanlam</span>
+      <span style="font-size:9px;font-weight:700;color:#aaa;font-family:'Nunito',sans-serif;letter-spacing:0.5px;text-transform:uppercase;">Financial Services</span>
+    </a>
+  </div>
+  <div id="nav-wrap"><div id="nav-bar"></div></div>
+  <div id="change-path" title="Choose a different guide">← My Guide</div>
+</div>
+
+<div id="mode-bar" role="group" aria-label="View mode">
+  <button class="mode-btn" data-mode="explore" type="button" aria-pressed="false">Explore</button>
+  <button class="mode-btn active" data-mode="navigate" type="button" aria-pressed="true">Navigate</button>
+  <button class="mode-btn" data-mode="guide" type="button" aria-pressed="false">Guide Me</button>
+</div>
+
+<div id="canvas-container"></div>
+
+<div id="mini-tip">
+  <span id="mt-close">✕</span>
+  <div id="mt-content">
+    <div id="mt-label"></div>
+    <div id="mt-body"></div>
+    <div id="mt-action"></div>
+  </div>
+</div>
+
+<div id="content-panel">
+  <div id="cp-resize-handle"></div>
+  <div id="cp-path-bar">
+    <button id="cpb-close" title="Exit guide">✕</button>
+    <button id="cpb-back">← Back</button>
+    <div id="cpb-info">
+      <span id="cpb-label"></span>
+      <span id="cpb-step"></span>
+    </div>
+    <button id="cpb-cta">☕ Book</button>
+    <button id="cpb-next">Next →</button>
+  </div>
+  <div id="cp-inner">
+    <div id="cp-step-badge"></div>
+    <div id="cp-title"></div>
+    <div id="cp-intro"></div>
+    <div id="cp-items"></div>
+  </div>
+  <div id="cp-admin-bar">
+    <span id="cp-admin-label">Admin mode</span>
+    <label class="cp-toggle-wrap">
+      <input type="checkbox" id="cp-admin-toggle">
+      <span class="cp-toggle-slider"></span>
+    </label>
+  </div>
+</div>
+
+<div id="bottom-bar"><div id="bottom-scroll"></div></div>
+
+<div id="controls">
+  <div class="ctrl"><span class="ctrl-icon">🫧</span> <span class="ctrl-long">Select a path from the top bar</span></div>
+  <div class="ctrl"><span class="ctrl-icon">👆</span> <span class="ctrl-long">Drag to spin</span></div>
+  <div class="ctrl"><span class="ctrl-icon">🔍</span> <span class="ctrl-long">Scroll to zoom</span></div>
+  <div class="ctrl"><span class="ctrl-dot-a"></span><span class="ctrl-dot-b"></span> <span class="ctrl-long">Tap any node to read</span></div>
+</div>
+
+<div id="path-guide">
+  <div id="pg-exit">✕ Exit guide</div>
+  <div id="pg-label"></div>
+  <div id="pg-step"></div>
+  <div id="pg-dots"></div>
+  <div id="pg-nav">
+    <button id="pg-back">← Back</button>
+    <button id="pg-next">Next →</button>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
+
+// ── DATA ─────────────────────────────────────────────────────────────────────
+
+const BASE = "https://www.sanlamonline.co.za";
+const CTA  = "https://www.sanlamonline.co.za/personal/financial-planning/find-an-adviser";
+
+const strandA = [
+  {
+    id: "insurance", label: "Insurance", strand: "A",
+    tip: "Rest assured that you're covered no matter what life throws your way.",
+    children: [
+      { id: "life-cover",    label: "Life Cover",       tip: "Financial protection for your family if you're no longer there to provide.", url: BASE + "/personal/insurance/life-insurance" },
+      { id: "disability",    label: "Disability Cover",  tip: "Income replacement if injury or illness permanently prevents you from working.", url: BASE + "/personal/insurance/disability-insurance" },
+      { id: "funeral-cover", label: "Funeral Cover",    tip: "Dignified cover for funeral costs — protecting your family from unexpected expense.", url: BASE + "/personal/insurance/funeral-cover" },
+    ]
+  },
+  {
+    id: "retirement", label: "Retirement", strand: "A",
+    tip: "Making smart choices about your savings throughout life can help you retire comfortably.",
+    children: [
+      { id: "retirement-annuity", label: "Retirement Annuity", tip: "Tax-deductible contributions growing for your retirement — and the government helps fund it.", url: BASE + "/personal/retirement/retirement-annuity" },
+      { id: "preservation-fund",  label: "Preservation Fund",  tip: "Keep your retirement savings intact when changing jobs — don't cash out.", url: BASE + "/personal/retirement/preservation-fund" },
+      { id: "living-annuity",     label: "Living Annuity",     tip: "Flexible income draw-down in retirement from your accumulated savings.", url: BASE + "/personal/retirement/living-annuity" },
+    ]
+  },
+  {
+    id: "savings", label: "Savings & Investments", strand: "A",
+    tip: "All good things take time. Build wealth for you and your descendants starting today.",
+    children: [
+      { id: "tax-free",    label: "Tax-Free Savings",   tip: "R36 000/year invested completely tax-free — the most efficient savings vehicle in SA.", url: BASE + "/personal/savings-investments/tax-free-savings-account" },
+      { id: "unit-trusts", label: "Unit Trusts",        tip: "Professionally managed, diversified investment portfolios for every risk profile.", url: BASE + "/personal/savings-investments/unit-trusts" },
+      { id: "offshore",    label: "Offshore Investing", tip: "Diversify internationally for currency protection and access to global growth.", url: BASE + "/personal/savings-investments" },
+    ]
+  },
+  {
+    id: "health", label: "Health", strand: "A",
+    tip: "Great health solutions, from gap cover to medical aid — tailored for your life.",
+    children: [
+      { id: "medical-aid",      label: "Medical Aid",      tip: "Comprehensive medical cover — we compare options to find the right fit for your life.", url: BASE + "/personal/health/medical-aid" },
+      { id: "gap-cover",        label: "Gap Cover",        tip: "Bridges the shortfall between what your medical aid pays and what specialists charge.", url: BASE + "/personal/health/gap-cover" },
+      { id: "health-insurance", label: "Health Insurance", tip: "Affordable day-to-day health cover for those who need more than medical aid.", url: BASE + "/personal/health" },
+    ]
+  },
+  {
+    id: "credit", label: "Credit", strand: "A",
+    tip: "Manage, build, and optimise your credit profile to achieve financial success.",
+    children: [
+      { id: "home-loans",     label: "Home Loans",      tip: "Competitive home loan rates with expert advice to get you into your first or next home.", url: BASE + "/personal/credit/home-loans" },
+      { id: "personal-loans", label: "Personal Loans",  tip: "Flexible personal loans with transparent terms — for life's planned and unplanned moments.", url: BASE + "/personal/credit/personal-loans" },
+      { id: "credit-life",    label: "Credit Life",     tip: "Protects your outstanding debt if you die, become disabled, or lose your income.", url: BASE + "/personal/credit" },
+    ]
+  },
+  {
+    id: "financial-planning", label: "Financial Planning", strand: "A",
+    tip: "Manage and understand your financial wellbeing with Sanlam.",
+    children: [
+      { id: "find-advisor",    label: "Find an Advisor",   tip: "Connect with a qualified Sanlam financial advisor near you — free first consultation.", url: CTA },
+      { id: "budgeting",       label: "Budget Planning",   tip: "Understand where your money goes and build a plan that works for your lifestyle.", url: BASE + "/personal/financial-planning" },
+      { id: "wealth-planning", label: "Wealth Planning",   tip: "Long-term wealth strategy — investments, tax, estate and retirement all aligned.", url: BASE + "/personal/financial-planning" },
+    ]
+  },
+  {
+    id: "wills-estate", label: "Wills & Estate", strand: "A",
+    tip: "Protect what you've built and ensure your wishes are carried out.",
+    children: [
+      { id: "wills",           label: "Will Drafting",    tip: "Without a valid will, the government decides what happens to everything you've built.", url: BASE + "/personal/wills-trusts-and-estates/wills" },
+      { id: "estate-planning", label: "Estate Planning",  tip: "Comprehensive plan covering executor fees, estate duty, and tax implications.", url: BASE + "/personal/wills-trusts-and-estates/estate-planning" },
+      { id: "trusts",          label: "Trusts",           tip: "Legally structured trusts to protect your assets and provide for future generations.", url: BASE + "/personal/wills-trusts-and-estates/trusts" },
+    ]
+  },
+  {
+    id: "business", label: "Business Solutions", strand: "A",
+    tip: "Sanlam protects and grows your business as much as your personal wealth.",
+    children: [
+      { id: "biz-insurance",    label: "Business Insurance", tip: "Protect your business against the unexpected — key person, buy-sell, and more.", url: BASE + "/business" },
+      { id: "employee-benefits",label: "Employee Benefits",  tip: "Attract and retain top talent with group life, disability, and medical cover.", url: BASE + "/business/employee-benefits" },
+      { id: "biz-invest",       label: "Business Investments", tip: "Grow your business surplus with tailored Sanlam investment solutions.", url: BASE + "/business" },
+    ]
+  },
+];
+
+const strandB = [
+  {
+    id: "brand", label: "Sanlam", strand: "B",
+    tip: "We preserve, manage and grow your wealth. Purpose-led. Client-centred. 100+ years.",
+    children: [
+      { id: "purpose",    label: "Our Purpose",   tip: "Helping clients live with confidence — through financial inclusion, transformation and empowerment." },
+      { id: "founded",    label: "Est. 1918",      tip: "Over 100 years of preserving, managing and growing the wealth of South Africans." },
+      { id: "pan-africa", label: "Pan-African",   tip: "Operations across South Africa and 33 other African countries — the continent's largest insurer." },
+    ]
+  },
+  {
+    id: "track-record", label: "Track Record", strand: "B",
+    tip: "A century of delivering superior value to clients, employees, shareholders and society.",
+    children: [
+      { id: "100-years",      label: "100+ Years",       tip: "Founded in 1918. Through every South African economic cycle, Sanlam has delivered." },
+      { id: "jse-listed",     label: "JSE Listed",       tip: "Listed on the Johannesburg Stock Exchange — transparent, accountable, and investor-grade." },
+      { id: "annual-results", label: "2025 Results",     tip: "Strong 2025 annual results released 12 March 2026 — consistent long-term performance.", url: "https://www.sanlam.com" },
+    ]
+  },
+  {
+    id: "f-factor", label: "The F Factor", strand: "B",
+    tip: "Financial confidence that others can't help but notice.",
+    children: [
+      { id: "ff-what", label: "What Is It?",   tip: "The F Factor is financial confidence — the kind that comes from knowing your money is working." },
+      { id: "ff-how",  label: "How to Get It", tip: "Through smart planning, the right products, and expert advice tailored to your life." },
+      { id: "ff-why",  label: "Why It Matters",tip: "Financial confidence changes how you make decisions, take opportunities, and live your life." },
+    ]
+  },
+  {
+    id: "advice", label: "Expert Advice", strand: "B",
+    tip: "Qualified financial advisors across South Africa — your financial partner for life.",
+    children: [
+      { id: "find-advisor2",  label: "Find an Advisor",  tip: "Thousands of qualified Sanlam advisors across SA — expert guidance wherever you are.", url: CTA },
+      { id: "advice-process", label: "How It Works",     tip: "Free consultation → understand your needs → tailored plan → ongoing review.", url: BASE + "/personal/financial-planning" },
+      { id: "fsca",           label: "FSCA Regulated",   tip: "Regulated by the Financial Sector Conduct Authority. Your money is protected.", url: BASE },
+    ]
+  },
+  {
+    id: "inclusion", label: "Financial Inclusion", strand: "B",
+    tip: "Promoting financial inclusion, transformation and empowerment for all South Africans.",
+    children: [
+      { id: "transformation", label: "Transformation",    tip: "Committed to broad-based financial inclusion — making financial services accessible to all." },
+      { id: "education",      label: "Financial Literacy",tip: "Sanlam invests in financial education to help South Africans make better money decisions." },
+      { id: "community",      label: "Community Impact",  tip: "Through the Sanlam Foundation, investing in the communities where we operate.", url: "https://www.sanlam.com" },
+    ]
+  },
+  {
+    id: "africa", label: "Africa Operations", strand: "B",
+    tip: "Pan-African presence — 33 African countries, one mission.",
+    children: [
+      { id: "africa-reach",   label: "33 Countries",       tip: "From Kenya to Namibia to Mozambique — Sanlam is Africa's largest insurance group." },
+      { id: "sanlam-invest",  label: "Sanlam Investments", tip: "Dedicated investment management across African markets.", url: "https://www.sanlaminvestments.com/" },
+      { id: "private-wealth", label: "Private Wealth",     tip: "Sanlam Private Wealth — bespoke wealth management for high-net-worth clients.", url: "https://sanlamprivatewealth.sanlam.com/" },
+    ]
+  },
+  {
+    id: "digital", label: "Digital & Self-Service", strand: "B",
+    tip: "Manage your money anytime, anywhere — Sanlam's digital tools work for you.",
+    children: [
+      { id: "online-portal", label: "Online Portal",    tip: "View policies, statements, tax certificates and portfolio — all in one secure dashboard.", url: "https://www.sanlamonline.co.za" },
+      { id: "tax-certs",     label: "Tax Certificates", tip: "Get your tax certificates instantly online — no branch visit needed.", url: "https://www.sanlamonline.co.za" },
+      { id: "scam-smart",    label: "Fraud Protection", tip: "Sanlam's Scam Smart campaign — know the signs of financial fraud before it happens.", url: BASE },
+    ]
+  },
+  {
+    id: "contact", label: "Get in Touch", strand: "B",
+    tip: "Ready to start your Sanlam journey?",
+    children: [
+      { id: "find-advisor3", label: "Find an Advisor", tip: "Connect with a qualified Sanlam advisor near you for a free consultation.", url: CTA },
+      { id: "call-sanlam",   label: "Call Us",         tip: "0860 726 526 — Sanlam's main client services line.", url: "tel:0860726526" },
+      { id: "contact-online",label: "Contact Online",  tip: "Submit a query online — Sanlam responds within one business day.", url: BASE + "/contact-us" },
+    ]
+  },
+];
+
+const rungHubs = [[0,1],[1,0],[2,4],[3,3],[4,2],[5,5],[6,6],[7,7]];
+
+// Pre-built lookup map
+const hubById = Object.fromEntries([...strandA, ...strandB].map(h => [h.id, h]));
+
+// ── CONTENT DATA ──────────────────────────────────────────────────────────────
+
+const ATTOOH_CONTENT = {
+  insurance: { title: "Insurance", color: "#0075C9", items: [
+    { id: "life-cover", icon: "🛡️", title: "Life Cover", body: "Financial protection for your family if you're no longer there to provide. Sanlam life cover ensures your loved ones maintain their lifestyle and financial stability — no matter what.", articles: [{ title: "Find an advisor for life cover", url: CTA }] },
+    { id: "disability", icon: "💪", title: "Disability Cover", body: "If injury or illness permanently prevents you from working, disability cover replaces your income. Most people underestimate this risk — Sanlam helps you cover it properly.", articles: [{ title: "Get disability cover advice", url: CTA }] },
+    { id: "funeral-cover", icon: "🕊️", title: "Funeral Cover", body: "Dignified, affordable funeral cover that protects your family from unexpected costs during an already difficult time. Sanlam's funeral products cover the full family.", articles: [{ title: "Explore funeral cover options", url: CTA }] },
+  ]},
+  retirement: { title: "Retirement", color: "#0151A3", items: [
+    { id: "retirement-annuity", icon: "🏦", title: "Retirement Annuity", body: "Tax-deductible contributions growing for your retirement. Every rand you contribute reduces your taxable income — the government effectively helps fund your retirement.", articles: [{ title: "Start your retirement annuity", url: CTA }] },
+    { id: "preservation-fund", icon: "🔒", title: "Preservation Fund", body: "Changing jobs? Don't cash out your retirement savings. A preservation fund keeps your money growing tax-efficiently — protecting your future self from short-term decisions.", articles: [{ title: "Preserve your retirement savings", url: CTA }] },
+    { id: "living-annuity", icon: "⏰", title: "Living Annuity", body: "Flexible income draw-down in retirement from your accumulated fund. You decide the draw-down rate (2.5%–17.5% per year) and how your capital is invested.", articles: [{ title: "Plan your retirement income", url: CTA }] },
+  ]},
+  savings: { title: "Savings & Investments", color: "#0075C9", items: [
+    { id: "tax-free", icon: "💎", title: "Tax-Free Savings Account", body: "R36 000 per year invested completely tax-free. No tax on growth, dividends, or withdrawal — ever. The most efficient savings vehicle available to every South African.", articles: [{ title: "Open a tax-free savings account", url: CTA }] },
+    { id: "unit-trusts", icon: "📊", title: "Unit Trusts", body: "Professionally managed, diversified investment portfolios for all risk profiles. Accessible from as little as R500/month. Sanlam Investments manages over R1 trillion in assets.", articles: [{ title: "Find the right unit trust", url: CTA }] },
+    { id: "offshore", icon: "🌍", title: "Offshore Investing", body: "Diversify internationally for currency protection and access to global growth opportunities. Sanlam guides you through exchange control regulations and the best offshore vehicles.", articles: [{ title: "Explore offshore investing", url: CTA }] },
+  ]},
+  health: { title: "Health", color: "#0151A3", items: [
+    { id: "medical-aid", icon: "🏥", title: "Medical Aid", body: "Comprehensive medical cover — Sanlam compares all major schemes to find the right fit for your life and budget. Expert guidance, no pressure, right fit.", articles: [{ title: "Compare medical aid options", url: CTA }] },
+    { id: "gap-cover", icon: "🔗", title: "Gap Cover", body: "Bridges the shortfall between what your medical aid pays out and what specialists actually charge. Often overlooked — always needed when you need it most.", articles: [{ title: "Get gap cover advice", url: CTA }] },
+    { id: "health-insurance", icon: "❤️", title: "Health Insurance", body: "Affordable day-to-day health cover for those who need more than medical aid can provide. Designed for South Africans at every income level.", articles: [{ title: "Explore health insurance options", url: CTA }] },
+  ]},
+  credit: { title: "Credit", color: "#0075C9", items: [
+    { id: "home-loans", icon: "🏠", title: "Home Loans", body: "Competitive home loan rates with expert advice to get you into your first or next home. Sanlam's advisors guide you through the full process — from application to registration.", articles: [{ title: "Apply for a home loan", url: CTA }] },
+    { id: "personal-loans", icon: "💳", title: "Personal Loans", body: "Flexible personal loans with transparent terms — for life's planned and unplanned moments. Clear pricing, no hidden fees, straightforward repayment.", articles: [{ title: "Apply for a personal loan", url: CTA }] },
+    { id: "credit-life", icon: "🛡️", title: "Credit Life Insurance", body: "Protects your outstanding debt if you die, become disabled, or lose your income. Ensures your family isn't left with your debt — a critical but often overlooked cover.", articles: [{ title: "Get credit life insurance", url: CTA }] },
+  ]},
+  "financial-planning": { title: "Financial Planning", color: "#0151A3", items: [
+    { id: "find-advisor", icon: "🤝", title: "Find a Financial Advisor", body: "Thousands of qualified Sanlam financial advisors across South Africa. Free first consultation, no obligation — just an honest conversation about your financial future.", articles: [{ title: "Find an advisor near you →", url: CTA }] },
+    { id: "budgeting", icon: "📋", title: "Budget Planning", body: "Understand where your money goes and build a plan that actually works for your lifestyle. Sanlam's advisors help you identify leaks and redirect money toward your goals.", articles: [{ title: "Start financial planning", url: CTA }] },
+    { id: "wealth-planning", icon: "📈", title: "Wealth Planning", body: "Long-term wealth strategy — investments, tax efficiency, estate planning and retirement all aligned in one coherent plan. Your financial future, mapped out clearly.", articles: [{ title: "Build your wealth plan", url: CTA }] },
+  ]},
+  "wills-estate": { title: "Wills & Estate", color: "#0075C9", items: [
+    { id: "wills", icon: "📜", title: "Will Drafting", body: "Without a valid will, the Intestate Succession Act decides what happens to everything you've built. Sanlam helps you draft a legally sound will — protecting your family's future.", articles: [{ title: "Draft your will", url: BASE + "/personal/wills-trusts-and-estates/wills" }] },
+    { id: "estate-planning", icon: "🏛️", title: "Estate Planning", body: "A comprehensive plan covering executor fees, estate duty, conveyancing, and tax implications. The cost of not having a plan is far greater than the cost of having one.", articles: [{ title: "Plan your estate", url: CTA }] },
+    { id: "trusts", icon: "🔐", title: "Trusts", body: "Legally structured trusts to protect your assets across generations. One of the most powerful estate planning tools available — and one of the most misunderstood.", articles: [{ title: "Ask about trust structures", url: CTA }] },
+  ]},
+  business: { title: "Business Solutions", color: "#0151A3", items: [
+    { id: "biz-insurance", icon: "🏢", title: "Business Insurance", body: "Keyman insurance, buy-sell agreements, contingent liability cover — Sanlam protects your business from the loss of critical people and unexpected events.", articles: [{ title: "Protect your business", url: CTA }] },
+    { id: "employee-benefits", icon: "👥", title: "Employee Benefits", body: "Group life, group disability, and group medical aid — attract and retain top talent with smart benefit packages. Sanlam structures and manages your full benefits programme.", articles: [{ title: "Set up employee benefits", url: CTA }] },
+    { id: "biz-invest", icon: "💰", title: "Business Investments", body: "Grow your business surplus intelligently with tailored Sanlam investment solutions. Purpose-built for business entities, trusts, and company surplus capital.", articles: [{ title: "Invest your business surplus", url: CTA }] },
+  ]},
+  brand: { title: "Sanlam", color: "#0075C9", items: [
+    { id: "purpose", icon: "🏅", title: "Our Purpose", body: "We are a purpose-led organisation, with all our efforts centred on helping our clients live with confidence. We promote financial inclusion, transformation and empowerment.", articles: [{ title: "About Sanlam", url: "https://www.sanlam.com" }] },
+    { id: "founded", icon: "📅", title: "Established 1918", body: "Over 100 years of preserving, managing and growing the wealth of South Africans. Through recessions, booms, and every economic cycle — Sanlam has consistently delivered.", articles: [{ title: "Our history", url: "https://www.sanlam.com" }] },
+    { id: "pan-africa", icon: "🌍", title: "Pan-African Reach", body: "Operations across South Africa and 33 other African countries. Africa's largest insurance group — with a proven track record of delivering superior value across the continent.", articles: [{ title: "Sanlam in Africa", url: "https://www.sanlam.com" }] },
+  ]},
+  "track-record": { title: "Track Record", color: "#0151A3", items: [
+    { id: "100-years", icon: "📈", title: "100+ Years of Performance", body: "Founded in 1918. Through the Great Depression, apartheid, democratic transition, COVID — Sanlam has preserved and grown South African wealth across every generation.", articles: [{ title: "Our history", url: "https://www.sanlam.com" }] },
+    { id: "jse-listed", icon: "✅", title: "JSE Listed", body: "Sanlam is listed on the Johannesburg Stock Exchange — fully transparent, publicly accountable, and governed to the highest institutional standards.", articles: [{ title: "Investor relations", url: "https://www.sanlam.com" }] },
+    { id: "annual-results", icon: "📊", title: "Strong 2025 Results", body: "Sanlam released strong 2025 annual results on 12 March 2026. Consistent long-term performance across all business units — proof that the strategy is working.", articles: [{ title: "View 2025 results", url: "https://www.sanlam.com" }] },
+  ]},
+  "f-factor": { title: "The F Factor", color: "#0075C9", items: [
+    { id: "ff-what", icon: "✨", title: "What Is the F Factor?", body: "The F Factor is financial confidence — the kind that others can't help but notice. It's what you feel when your money is working, your future is planned, and you're in control.", articles: [{ title: "Discover the F Factor", url: BASE }] },
+    { id: "ff-how", icon: "🎯", title: "How to Get It", body: "Through smart planning, the right products, and expert advice tailored specifically to your life. The F Factor isn't for the wealthy — it's for anyone with a Sanlam advisor.", articles: [{ title: "Find your advisor", url: CTA }] },
+    { id: "ff-why", icon: "💡", title: "Why It Matters", body: "Financial confidence changes how you make every decision — career moves, family choices, opportunities you take or pass up. The F Factor isn't a number. It's a feeling.", articles: [{ title: "Start your journey", url: CTA }] },
+  ]},
+  advice: { title: "Expert Advice", color: "#0151A3", items: [
+    { id: "find-advisor2", icon: "🤝", title: "Find a Sanlam Advisor", body: "Thousands of FSCA-registered Sanlam financial advisors across South Africa. Wherever you are, your advisor is nearby — free first consultation, no obligation.", articles: [{ title: "Find an advisor near you →", url: CTA }] },
+    { id: "advice-process", icon: "📋", title: "How the Process Works", body: "Free consultation → deep-dive into your financial situation → tailored plan → product implementation → ongoing annual review. Not a once-off sale — a lifetime relationship.", articles: [{ title: "Start your financial plan", url: CTA }] },
+    { id: "fsca", icon: "✅", title: "FSCA Regulated", body: "Every Sanlam advisor is qualified and registered with the Financial Sector Conduct Authority. Your money, your plan, and your advisor are all properly governed and protected.", articles: [{ title: "Why choose Sanlam", url: BASE }] },
+  ]},
+  inclusion: { title: "Financial Inclusion", color: "#0075C9", items: [
+    { id: "transformation", icon: "🌱", title: "Transformation", body: "Sanlam is committed to broad-based financial inclusion — making world-class financial services accessible to every South African, regardless of income level.", articles: [{ title: "Our transformation journey", url: "https://www.sanlam.com" }] },
+    { id: "education", icon: "📚", title: "Financial Literacy", body: "Sanlam invests significantly in financial education — helping South Africans at every income level make better, more confident money decisions.", articles: [{ title: "Financial education resources", url: BASE }] },
+    { id: "community", icon: "❤️", title: "Community Impact", body: "Through the Sanlam Foundation, Sanlam invests in the communities where it operates — because financial wellness and community wellness are inseparable.", articles: [{ title: "Sanlam Foundation", url: "https://www.sanlam.com" }] },
+  ]},
+  africa: { title: "Africa Operations", color: "#0151A3", items: [
+    { id: "africa-reach", icon: "🗺️", title: "33 African Countries", body: "From Kenya to Namibia to Mozambique — Sanlam operates across 33 African countries, making it the continent's largest and most trusted insurance group.", articles: [{ title: "Sanlam across Africa", url: "https://www.sanlam.com" }] },
+    { id: "sanlam-invest", icon: "📈", title: "Sanlam Investments", body: "Dedicated investment management across African markets. Managing over R1 trillion in assets — deep expertise in emerging market investment strategy.", articles: [{ title: "Sanlam Investments", url: "https://www.sanlaminvestments.com/" }] },
+    { id: "private-wealth", icon: "💎", title: "Sanlam Private Wealth", body: "Bespoke wealth management for high-net-worth clients. Tailored investment portfolios, estate planning, and tax structuring at the highest level.", articles: [{ title: "Sanlam Private Wealth", url: "https://sanlamprivatewealth.sanlam.com/" }] },
+  ]},
+  digital: { title: "Digital & Self-Service", color: "#0075C9", items: [
+    { id: "online-portal", icon: "💻", title: "Sanlam Online Portal", body: "View all your policies, statements, portfolio performance, and tax certificates in one secure online dashboard — anytime, from anywhere.", articles: [{ title: "Log in to Sanlam Online", url: "https://www.sanlamonline.co.za" }] },
+    { id: "tax-certs", icon: "📄", title: "Tax Certificates", body: "Get your tax certificates instantly online. No branch visit, no waiting — everything you need for your tax return available at the click of a button.", articles: [{ title: "Get your tax certificates", url: "https://www.sanlamonline.co.za" }] },
+    { id: "scam-smart", icon: "🔒", title: "Scam Smart", body: "Sanlam's fraud awareness campaign — know the signs of financial fraud and scams before they happen to you. Spot it. Stop it. Report it.", articles: [{ title: "Stay Scam Smart", url: BASE }] },
+  ]},
+  contact: { title: "Get in Touch", color: "#0151A3", items: [
+    { id: "find-advisor3", icon: "🤝", title: "Find an Advisor", body: "Connect with a qualified Sanlam financial advisor near you for a free, no-obligation consultation. Your financial future starts with one conversation.", articles: [{ title: "Find an advisor near you →", url: CTA }] },
+    { id: "call-sanlam", icon: "📞", title: "Call Us", body: "0860 726 526 — Sanlam's main client services line. Qualified consultants ready to help with any query about your policies, products, or financial planning.", articles: [{ title: "Call 0860 726 526", url: "tel:0860726526" }] },
+    { id: "contact-online", icon: "✉️", title: "Contact Online", body: "Submit a query online at any time — Sanlam responds personally within one business day. Fast, convenient, and no hold music.", articles: [{ title: "Contact Sanlam online", url: BASE + "/contact-us" }] },
+  ]},
+};
+
+// ── BUILD NAV BAR ─────────────────────────────────────────────────────────────
+
+const navBar = document.getElementById("nav-bar");
+
+// Book a Meeting CTA — pinned first
+const ctaEl = document.createElement("div");
+ctaEl.className = "nav-cta"; ctaEl.textContent = "🤝 Find an Advisor";
+ctaEl.addEventListener("click", () => {
+  if (window.SphereAnalytics) window.SphereAnalytics.track('cta_clicked', { cta: 'coffee-date' });
+  window.open(CTA, "_blank");
+});
+navBar.appendChild(ctaEl);
+
+const pathDefs = [
+  { key: "protect",  label: "🛡️ Protect What I Have" },
+  { key: "retire",   label: "🏦 Plan My Retirement" },
+  { key: "grow",     label: "📈 Grow My Wealth" },
+  { key: "starting", label: "🌱 Just Starting Out" },
+  { key: "business", label: "🏢 I'm a Business Owner" },
+];
+  const p = document.createElement("div");
+  p.className = "nav-pill path"; p.textContent = label; p.dataset.path = key;
+  navBar.appendChild(p);
+});
+
+const bottomScroll = document.getElementById("bottom-scroll");
+const allPill = document.createElement("div");
+allPill.className = "nav-pill all active"; allPill.textContent = "All"; allPill.dataset.id = "all";
+bottomScroll.appendChild(allPill);
+
+strandA.forEach(hub => {
+  const p = document.createElement("div");
+  p.className = "nav-pill a"; p.textContent = hub.label; p.dataset.id = hub.id;
+  bottomScroll.appendChild(p);
+});
+const divEl = document.createElement("div"); divEl.className = "nav-divider";
+bottomScroll.appendChild(divEl);
+strandB.forEach(hub => {
+  const p = document.createElement("div");
+  p.className = "nav-pill b"; p.textContent = hub.label; p.dataset.id = hub.id;
+  bottomScroll.appendChild(p);
+});
+
+// ── SCENE ─────────────────────────────────────────────────────────────────────
+
+const container = document.getElementById("canvas-container");
+const W = () => container.clientWidth;
+const H = () => container.clientHeight;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
+scene.fog = new THREE.FogExp2(0xffffff, 0.005);
+
+const camera = new THREE.PerspectiveCamera(50, W() / H(), 0.1, 120);
+camera.position.set(0, 0, 32);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(W(), H());
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+container.appendChild(renderer.domElement);
+
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.setSize(W(), H());
+labelRenderer.domElement.style.position = "absolute";
+labelRenderer.domElement.style.top = "0"; labelRenderer.domElement.style.left = "0";
+labelRenderer.domElement.style.pointerEvents = "none";
+labelRenderer.domElement.style.overflow = "hidden";
+container.appendChild(labelRenderer.domElement);
+
+// ── LIGHTING ──────────────────────────────────────────────────────────────────
+
+scene.add(new THREE.AmbientLight(0xffffff, 1.1));
+const limeLight = new THREE.PointLight(0x0075C9, 2.0, 50);
+limeLight.position.set(8, 10, 12); scene.add(limeLight);
+const darkLight = new THREE.PointLight(0x0151A3, 1.2, 50);
+darkLight.position.set(-8, -10, 8); scene.add(darkLight);
+const keyLight = new THREE.DirectionalLight(0xffffff, 0.7);
+keyLight.position.set(5, 5, 8); scene.add(keyLight);
+
+// ── SPHERE GEOMETRY ───────────────────────────────────────────────────────────
+
+const SPHERE_R = 7, HUB_R = 0.50, CHILD_R = 0.20;
+const pivot = new THREE.Group(); scene.add(pivot);
+let rotX = -0.10, rotY = 0;
+
+pivot.add(new THREE.LineSegments(
+  new THREE.WireframeGeometry(new THREE.SphereGeometry(SPHERE_R, 20, 16)),
+  new THREE.LineBasicMaterial({ color: 0xdddddd, transparent: true, opacity: 0.10 })
+));
+const eqMesh = new THREE.Mesh(
+  new THREE.TorusGeometry(SPHERE_R * 0.995, 0.055, 8, 100),
+  new THREE.MeshBasicMaterial({ color: 0xcccccc, transparent: true, opacity: 0.40 })
+);
+eqMesh.rotation.x = Math.PI / 2; pivot.add(eqMesh);
+
+function hubAngles(hubIdx, isA) {
+  const sign = isA ? 1 : -1, ring = hubIdx % 2, ri = Math.floor(hubIdx / 2);
+  if (ring === 0) return { phi: ri * Math.PI / 2,               lat: sign * 1.05 };
+  else            return { phi: ri * Math.PI / 2 + Math.PI / 4, lat: sign * 0.52 };
+}
+function sphPos(phi, lat, r) {
+  r = r !== undefined ? r : SPHERE_R;
+  return new THREE.Vector3(r * Math.cos(lat) * Math.cos(phi), r * Math.sin(lat), r * Math.cos(lat) * Math.sin(phi));
+}
+const CHILD_OFFSETS = [{ dphi:-0.30, dlat:0.26 }, { dphi:0.30, dlat:0.26 }, { dphi:0.00, dlat:-0.28 }];
+
+// ── MATERIALS ─────────────────────────────────────────────────────────────────
+
+function hubMat(isA) {
+  return new THREE.MeshStandardMaterial({
+    color: isA ? 0x7aaa10 : 0x0151A3, emissive: isA ? 0x3a5508 : 0x1a2e00,
+    emissiveIntensity: 0.25, roughness: 0.25, metalness: 0.45, transparent: true, opacity: 1.0,
+  });
+}
+function childMat(isA) {
+  return new THREE.MeshStandardMaterial({
+    color: isA ? 0x0075C9 : 0x507a00, emissive: isA ? 0x3a5508 : 0x1a2e00,
+    emissiveIntensity: 0.1, roughness: 0.4, metalness: 0.3, transparent: true, opacity: 1.0,
+  });
+}
+function glowMat(isA, isHub) {
+  return new THREE.MeshBasicMaterial({
+    color: isA ? 0x0075C9 : 0x0151A3, transparent: true,
+    opacity: isHub ? 0.09 : 0.05, side: THREE.BackSide,
+  });
+}
+const hoverMat = new THREE.MeshStandardMaterial({
+  color: 0xc8f040, emissive: 0x0075C9, emissiveIntensity: 0.7,
+  roughness: 0.15, metalness: 0.5, transparent: true, opacity: 1.0,
+});
+
+// ── BUILD STRANDS ─────────────────────────────────────────────────────────────
+
+const allClickable = [], hubGroups = {};
+
+function buildSphereStrand(strandData, isA) {
+  const hubGeo = new THREE.SphereGeometry(HUB_R, 24, 24);
+  const childGeo = new THREE.SphereGeometry(CHILD_R, 16, 16);
+  const hubGlow  = new THREE.SphereGeometry(HUB_R * 1.55, 16, 16);
+  const cGlowGeo = new THREE.SphereGeometry(CHILD_R * 1.80, 12, 12);
+
+  strandData.forEach((hub, hubIdx) => {
+    const { phi, lat } = hubAngles(hubIdx, isA);
+    const hPos = sphPos(phi, lat), hOut = hPos.clone().normalize();
+
+    const hg = new THREE.Mesh(hubGlow, glowMat(isA, true));
+    hg.position.copy(hPos); pivot.add(hg);
+
+    const hMat = hubMat(isA);
+    const hMesh = new THREE.Mesh(hubGeo, hMat);
+    hMesh.position.copy(hPos);
+    hMesh.userData = { isHub: true, data: hub, hubId: hub.id, originalMat: hMat, nodePhi: phi };
+    pivot.add(hMesh); allClickable.push({ mesh: hMesh });
+
+    const hDiv = document.createElement("div");
+    hDiv.className = "node-label " + (isA ? "hub-a" : "hub-b");
+    hDiv.textContent = hub.label;
+    const hLabel = new CSS2DObject(hDiv);
+    hLabel.position.copy(hOut.multiplyScalar(0.72));
+    hMesh.add(hLabel);
+    hMesh.userData.labelObj = hLabel;
+    hMesh.userData.labelEl  = hDiv;
+
+    hubGroups[hub.id] = { hubMesh: hMesh, phi, lat, isA };
+
+    hub.children.forEach((child, ci) => {
+      const off = CHILD_OFFSETS[ci % CHILD_OFFSETS.length];
+      const cPhi = phi + off.dphi;
+      const cPos = sphPos(cPhi, lat + off.dlat);
+      const cg = new THREE.Mesh(cGlowGeo, glowMat(isA, false));
+      cg.position.copy(cPos); pivot.add(cg);
+      const cMat = childMat(isA);
+      const cMesh = new THREE.Mesh(childGeo, cMat);
+      cMesh.position.copy(cPos);
+      cMesh.userData = { isHub: false, data: child, hubId: hub.id, originalMat: cMat, nodePhi: cPhi };
+      pivot.add(cMesh); allClickable.push({ mesh: cMesh });
+      const cDiv = document.createElement("div");
+      cDiv.className = "node-label " + (isA ? "child-a" : "child-b");
+      cDiv.textContent = child.label;
+      const cLabel = new CSS2DObject(cDiv);
+      cLabel.position.copy(cPos.clone().normalize().multiplyScalar(0.45));
+      cMesh.add(cLabel);
+      cMesh.userData.labelObj = cLabel;
+      cMesh.userData.labelEl  = cDiv;
+      pivot.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([hPos.clone(), cPos.clone()]),
+        new THREE.LineBasicMaterial({ color: isA ? 0x0075C9 : 0x0151A3, transparent: true, opacity: 0.30 })
+      ));
+    });
+  });
+}
+
+buildSphereStrand(strandA, true);
+buildSphereStrand(strandB, false);
+
+// ── CENTER NODE ───────────────────────────────────────────────────────────────
+
+const centerGeo = new THREE.SphereGeometry(1.10, 32, 32);
+const centerMat = new THREE.MeshStandardMaterial({
+  color: 0x0075C9, emissive: 0x0075C9, emissiveIntensity: 0.20,
+  roughness: 0.3, metalness: 0.2, transparent: true, opacity: 1.0,
+});
+const centerMesh = new THREE.Mesh(centerGeo, centerMat); pivot.add(centerMesh);
+
+// Glow rings
+[0.85, 1.3, 2.0].forEach((r, i) => {
+  pivot.add(new THREE.Mesh(
+    new THREE.SphereGeometry(r * 1.0, 20, 20),
+    new THREE.MeshBasicMaterial({ color: 0x0075C9, transparent: true, opacity: [0.10, 0.05, 0.02][i], side: THREE.BackSide })
+  ));
+});
+
+const cDiv = document.createElement("div");
+cDiv.className = "node-label hub-a";
+cDiv.style.fontSize = "13px"; cDiv.style.padding = "4px 14px";
+cDiv.style.background = "linear-gradient(135deg, rgba(0,117,201,0.15), rgba(1,81,163,0.12))";
+cDiv.style.border = "1.5px solid rgba(0,117,201,0.55)";
+cDiv.textContent = "attooh!";
+cDiv.addEventListener("click", e => { e.stopPropagation(); activePath ? exitPath() : selectHub("all"); });
+const cLabel = new CSS2DObject(cDiv);
+cLabel.position.set(0, 0.85, 0); pivot.add(cLabel);
+
+Object.values(hubGroups).forEach(({ hubMesh, isA }) => {
+  pivot.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), hubMesh.position.clone()]),
+    new THREE.LineBasicMaterial({ color: isA ? 0x0075C9 : 0x0151A3, transparent: true, opacity: 0.25 })
+  ));
+});
+
+rungHubs.forEach(([ai, bi]) => {
+  const { phi: phiA, lat: latA } = hubAngles(ai, true);
+  const { phi: phiB, lat: latB } = hubAngles(bi, false);
+  pivot.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([sphPos(phiA, latA), sphPos(phiB, latB)]),
+    new THREE.LineBasicMaterial({ color: 0xbbbbbb, transparent: true, opacity: 0.20 })
+  ));
+});
+
+// ── PATH DEFINITIONS ──────────────────────────────────────────────────────────
+
+const PATHS = {
+  protect:  { label: "Protect My Life",     color: "#0063AC", textColor: "#fff",    hubs: ["insurance", "health",     "estate",    "business"  ] },
+  grow:     { label: "Grow My Wealth",      color: "#0151A3", textColor: "#fff",    hubs: ["wealth",    "retirement", "employee",  "education" ] },
+  business: { label: "I'm a Business Owner",color: "#0260B8", textColor: "#fff",    hubs: ["business",  "employee",   "estate",    "retirement"] },
+  starter:  { label: "Just Starting Out",   color: "#0063AC", textColor: "#fff",    hubs: ["education", "insurance",  "health",    "wealth"    ] },
+  discover: { label: "About attooh!",       color: "#012F6B", textColor: "#0075C9", hubs: ["brand",     "team",       "story",     "values"    ] },
+};
+
+// ── MODE SELECTOR ─────────────────────────────────────────────────────────────
+
+let currentMode = null;
+
+// Maps first hub of each path → path key (for Guide Me entry-point clicks)
+// Derived from PATHS so it stays correct if hub order changes
+const entryHubToPath = Object.fromEntries(
+  Object.entries(PATHS).map(([key, p]) => [p.hubs[0], key])
+);
+
+function setGuideGlows(on) {
+  Object.keys(entryHubToPath).forEach(hubId => {
+    const group = hubGroups[hubId];
+    if (!group) return;
+    const el = group.hubMesh.userData.labelEl;
+    if (!el) return;
+    el.classList.toggle('guide-entry', on);
+  });
+}
+
+function applyMode(mode) {
+  if (currentMode === mode) return;
+  currentMode = mode;
+  // Body classes drive CSS
+  document.body.classList.remove('mode-explore', 'mode-navigate', 'mode-guide');
+  document.body.classList.add('mode-' + mode);
+  // Update button active state and aria-pressed
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    const isActive = btn.dataset.mode === mode;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+  // Guide Me entry-point glows
+  setGuideGlows(mode === 'guide' && !activePath);
+}
+
+document.getElementById('mode-bar').addEventListener('click', e => {
+  const btn = e.target.closest('.mode-btn');
+  if (!btn || activePath) return;  // block mode switching mid-path
+  applyMode(btn.dataset.mode);
+});
+
+// ── SELECTION STATE ───────────────────────────────────────────────────────────
+
+let activePath = null, pathStep = 0;
+let selectedHubIds = new Set();
+let targetRotX = null, targetRotY = null;
+let pathLines = [];
+
+function rotateTo(hubId, tiltFactor = 0.75) {
+  if (!hubGroups[hubId]) return;
+  const { phi, lat } = hubGroups[hubId];
+  const rawY = Math.PI / 2 - phi;
+  let diffY = ((rawY - rotY) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
+  targetRotY = rotY + diffY; targetRotX = -lat * tiltFactor;
+}
+
+function clearPathLines() { pathLines.forEach(l => pivot.remove(l)); pathLines = []; }
+
+function drawPathLines(hubs, color) {
+  clearPathLines();
+  const c = new THREE.Color(color);
+  for (let i = 0; i < hubs.length - 1; i++) {
+    const g1 = hubGroups[hubs[i]], g2 = hubGroups[hubs[i + 1]];
+    if (!g1 || !g2) continue;
+    const line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([g1.hubMesh.position.clone(), g2.hubMesh.position.clone()]),
+      new THREE.LineBasicMaterial({ color: c, transparent: true, opacity: 0.70, linewidth: 2 })
+    );
+    pivot.add(line); pathLines.push(line);
+  }
+}
+
+function updatePathGuide() {
+  if (!activePath) return;
+  const p = PATHS[activePath];
+  const isLast = pathStep === p.hubs.length - 1;
+  const hubData = hubById[p.hubs[pathStep]];
+  const stepText = `Step ${pathStep + 1} of ${p.hubs.length}: ${hubData ? hubData.label : p.hubs[pathStep]}`;
+
+  document.getElementById("path-guide").style.setProperty("--path-color", p.color);
+  document.getElementById("pg-label").textContent = p.label;
+  document.getElementById("pg-step").textContent = stepText;
+  const dots = document.getElementById("pg-dots"); dots.innerHTML = "";
+  p.hubs.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "pg-dot" + (i < pathStep ? " done" : i === pathStep ? " active" : "");
+    dots.appendChild(d);
+  });
+  document.getElementById("pg-back").style.display = pathStep === 0 ? "none" : "";
+  document.getElementById("pg-next").textContent = isLast ? "Finish ✓" : "Next →";
+
+  document.getElementById("cp-path-bar").style.setProperty("--pb-color", p.color);
+  document.getElementById("cp-path-bar").style.setProperty("--pb-text", p.textColor || "#fff");
+  document.getElementById("cpb-label").textContent = p.label;
+  document.getElementById("cpb-step").textContent = stepText;
+  document.getElementById("cpb-back").style.display = pathStep === 0 ? "none" : "";
+  document.getElementById("cpb-next").textContent = isLast ? "Finish ✓" : "Next →";
+  document.getElementById("cpb-next").style.background = isLast ? "#27ae60" : p.color;
+  document.getElementById("cpb-next").style.color = isLast ? "#fff" : (p.textColor || "#fff");
+}
+
+function applyPathStep() {
+  if (!activePath) return;
+  const currentHub = PATHS[activePath].hubs[pathStep];
+  selectedHubIds = new Set([currentHub]);
+  autoRotate = false;
+  rotateTo(currentHub, 0.70);
+  updatePathGuide();
+  renderContentPanel(currentHub);
+}
+
+function activatePath(pathKey) {
+  activePath = pathKey; pathStep = 0;
+  if (window.SphereAnalytics) window.SphereAnalytics.track('path_started', { path: pathKey, path_label: PATHS[pathKey]?.label || pathKey });
+  stopPillSpotlight();
+  setGuideGlows(false);
+  const p = PATHS[pathKey];
+  drawPathLines(p.hubs, p.color);
+  document.getElementById("path-guide").classList.add("visible");
+  document.getElementById("controls").style.display = "none";
+  document.body.classList.add("path-active");
+  applyPathStep();
+  setActivePathPill(pathKey);
+  allPill.classList.remove("active");
+}
+
+function exitPath() {
+  activePath = null; pathStep = 0;
+  selectedHubIds.clear(); hideContentPanel(); clearPathLines();
+  targetRotX = null; targetRotY = null; autoRotate = true;
+  document.getElementById("path-guide").classList.remove("visible");
+  document.getElementById("controls").style.display = "";
+  document.body.classList.remove("path-active");
+  setActivePathPill(null); setActiveNav("all");
+  pillSpotIndex = 0; startPillSpotlight();
+  setGuideGlows(currentMode === 'guide');
+}
+
+document.getElementById("pg-exit").addEventListener("click", exitPath);
+document.getElementById("cpb-close").addEventListener("click", exitPath);
+document.getElementById("pg-back").addEventListener("click", () => { if (pathStep > 0) { pathStep--; applyPathStep(); } });
+document.getElementById("pg-next").addEventListener("click", () => {
+  if (!activePath) return;
+  if (pathStep < PATHS[activePath].hubs.length - 1) { pathStep++; applyPathStep(); } else exitPath();
+});
+document.getElementById("cpb-back").addEventListener("click", () => { if (pathStep > 0) { pathStep--; applyPathStep(); } });
+document.getElementById("cpb-next").addEventListener("click", () => {
+  if (!activePath) return;
+  if (pathStep < PATHS[activePath].hubs.length - 1) { pathStep++; applyPathStep(); } else exitPath();
+});
+document.getElementById("cpb-cta").addEventListener("click", () => {
+  if (window.SphereAnalytics) window.SphereAnalytics.track('cta_clicked', { cta: 'coffee-date', context: 'path-bar', path: activePath });
+  window.open(CTA, "_blank");
+});
+
+function selectHub(hubId) {
+  if (activePath) return;
+  stopPillSpotlight();
+  if (hubId === "all" || (selectedHubIds.size === 1 && selectedHubIds.has(hubId))) {
+    selectedHubIds.clear(); targetRotX = null; targetRotY = null;
+    autoRotate = true; setActiveNav("all"); hideContentPanel(); return;
+  }
+  selectedHubIds = new Set([hubId]); autoRotate = false;
+  if (window.SphereAnalytics) {
+    const hubData = [...strandA, ...strandB].find(h => h.id === hubId);
+    window.SphereAnalytics.track('hub_clicked', { hub_id: hubId, hub_label: hubData?.label || hubId });
+  }
+  rotateTo(hubId); setActiveNav(hubId); renderContentPanel(hubId);
+}
+
+function setActiveNav(hubId) {
+  document.querySelectorAll(".nav-pill:not(.path)").forEach(p => p.classList.toggle("active", p.dataset.id === hubId));
+  if (!hubId || hubId === "all") allPill.classList.add("active");
+}
+function setActivePathPill(pathKey) {
+  document.querySelectorAll(".nav-pill.path").forEach(p => p.classList.toggle("active", p.dataset.path === pathKey));
+}
+
+// ── PANEL RESIZE ─────────────────────────────────────────────────────────────
+
+const contentPanel = document.getElementById("content-panel");
+const resizeHandle = document.getElementById("cp-resize-handle");
+let isResizing = false;
+resizeHandle.addEventListener("mousedown", e => { isResizing = true; resizeHandle.classList.add("dragging"); e.preventDefault(); });
+window.addEventListener("mousemove", e => {
+  if (!isResizing) return;
+  contentPanel.style.width = Math.min(Math.max(window.innerWidth - e.clientX, 280), window.innerWidth * 0.85) + "px";
+});
+window.addEventListener("mouseup", () => { if (isResizing) { isResizing = false; resizeHandle.classList.remove("dragging"); } });
+document.getElementById("change-path").addEventListener("click", () => { exitPath(); });
+
+// ── NAV PILL SPOTLIGHT CAROUSEL ───────────────────────────────────────────────
+
+let pillSpotTimer = null, pillSpotIndex = 0;
+function startPillSpotlight() {
+  const pills = Array.from(document.querySelectorAll(".nav-pill.path"));
+  if (!pills.length || activePath) return;
+  pills.forEach(p => p.classList.remove("spotlight"));
+  pills[pillSpotIndex % pills.length].classList.add("spotlight");
+  pills[pillSpotIndex % pills.length].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  pillSpotTimer = setInterval(() => {
+    if (activePath) return;
+    pills.forEach(p => p.classList.remove("spotlight"));
+    pillSpotIndex = (pillSpotIndex + 1) % pills.length;
+    pills[pillSpotIndex].classList.add("spotlight");
+    pills[pillSpotIndex].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, 3500);
+}
+function stopPillSpotlight() {
+  clearInterval(pillSpotTimer); pillSpotTimer = null;
+  document.querySelectorAll(".nav-pill.path").forEach(p => p.classList.remove("spotlight"));
+}
+startPillSpotlight();
+applyMode('navigate');
+
+navBar.addEventListener("click", e => {
+  if (navDragged) return;
+  const pill = e.target.closest(".nav-pill.path");
+  if (!pill) return;
+  if (activePath === pill.dataset.path) { exitPath(); return; }
+  activatePath(pill.dataset.path);
+});
+
+let bottomDragging = false, bottomDragged = false, bottomStartX = 0, bottomScrollStart = 0;
+bottomScroll.addEventListener("mousedown", e => { bottomDragging = true; bottomDragged = false; bottomStartX = e.pageX; bottomScrollStart = bottomScroll.scrollLeft; e.preventDefault(); });
+window.addEventListener("mousemove", e => { if (!bottomDragging) return; const dx = e.pageX - bottomStartX; if (Math.abs(dx) > 4) bottomDragged = true; bottomScroll.scrollLeft = bottomScrollStart - dx; });
+window.addEventListener("mouseup", () => { bottomDragging = false; });
+bottomScroll.addEventListener("wheel", e => { e.preventDefault(); bottomScroll.scrollLeft += e.deltaY + e.deltaX; }, { passive: false });
+bottomScroll.addEventListener("click", e => {
+  if (bottomDragged) return;
+  const pill = e.target.closest(".nav-pill");
+  if (!pill) return; stopPillSpotlight(); selectHub(pill.dataset.id);
+});
+
+let navDragging = false, navDragged = false, navStartX = 0, navScrollStart = 0;
+navBar.addEventListener("mousedown", e => { navDragging = true; navDragged = false; navStartX = e.pageX; navScrollStart = navBar.scrollLeft; e.preventDefault(); });
+window.addEventListener("mousemove", e => { if (!navDragging) return; const dx = e.pageX - navStartX; if (Math.abs(dx) > 4) navDragged = true; navBar.scrollLeft = navScrollStart - dx; });
+window.addEventListener("mouseup", () => { navDragging = false; });
+navBar.addEventListener("wheel", e => { e.preventDefault(); navBar.scrollLeft += e.deltaY + e.deltaX; }, { passive: false });
+
+// ── INTERACTION ───────────────────────────────────────────────────────────────
+
+const raycaster = new THREE.Raycaster();
+const mouse2    = new THREE.Vector2(-9999, -9999);
+let hoveredMesh = null, autoRotate = true;
+let mouseIsDown = false, isDragging = false;
+let dragStartX = 0, dragStartY = 0, lastMouseX = 0, lastMouseY = 0;
+const MIN_Z = 10, MAX_Z = 55;
+const DRAG_THRESHOLD = 8;
+
+const miniTip = document.getElementById("mini-tip");
+const mtLabel = document.getElementById("mt-label");
+const mtBody  = document.getElementById("mt-body");
+const mtAction= document.getElementById("mt-action");
+
+function getHit(clientX, clientY) {
+  const rect = container.getBoundingClientRect();
+  mouse2.x =  ((clientX - rect.left) / rect.width)  * 2 - 1;
+  mouse2.y = -((clientY - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse2, camera);
+  const hits = raycaster.intersectObjects(allClickable.map(c => c.mesh));
+  return hits.length > 0 ? hits[0].object : null;
+}
+
+document.getElementById("mt-close").addEventListener("click", () => miniTip.classList.remove("visible"));
+document.getElementById("mt-action").addEventListener("click", () => {
+  const url = miniTip.dataset.url;
+  if (url) {
+    if (window.SphereAnalytics) window.SphereAnalytics.track('article_clicked', { article_label: mtLabel.textContent, url });
+    window.open(url, "_blank");
+  }
+});
+
+function showMiniTip(data, clientX, clientY) {
+  mtLabel.textContent  = data.label;
+  mtBody.textContent   = data.tip || "";
+  mtAction.textContent = data.url ? "Open →" : "";
+  miniTip.dataset.url  = data.url || "";
+  miniTip.classList.add("visible");
+  const cardW = 300, cardH = 160;
+  miniTip.style.left = Math.max(10, Math.min(clientX + 16, window.innerWidth  - cardW - 10)) + "px";
+  miniTip.style.top  = Math.max(62, Math.min(clientY - 20, window.innerHeight - cardH - 10)) + "px";
+}
+
+function handleClick(clientX, clientY) {
+  const rect = container.getBoundingClientRect();
+  mouse2.x =  ((clientX - rect.left) / rect.width)  * 2 - 1;
+  mouse2.y = -((clientY - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse2, camera);
+  if (raycaster.intersectObject(centerMesh).length > 0) { activePath ? exitPath() : selectHub("all"); return; }
+  const hit = getHit(clientX, clientY);
+  if (!hit) {
+    miniTip.classList.remove("visible");
+    if (selectedHubIds.size > 0 && !activePath) { selectedHubIds.clear(); targetRotX = null; targetRotY = null; autoRotate = true; hideContentPanel(); setActiveNav("all"); }
+    return;
+  }
+  const { data } = hit.userData;
+  if (hit.userData.isHub) {
+    if (currentMode === 'guide' && entryHubToPath[data.id]) {
+      activatePath(entryHubToPath[data.id]);
+    } else {
+      selectHub(data.id);
+    }
+    return;
+  }
+  if (window.SphereAnalytics) window.SphereAnalytics.track('article_clicked', { article_id: data.id, article_label: data.label, hub_id: hit.userData.hubId });
+  showMiniTip(data, clientX, clientY);
+}
+
+container.addEventListener("mousedown", e => { mouseIsDown = true; isDragging = false; dragStartX = lastMouseX = e.clientX; dragStartY = lastMouseY = e.clientY; autoRotate = false; });
+window.addEventListener("mousemove", e => {
+  if (!mouseIsDown) {
+    const hit = getHit(e.clientX, e.clientY);
+    if (hit && hit !== hoveredMesh) { if (hoveredMesh) hoveredMesh.material = hoveredMesh.userData.originalMat; hoveredMesh = hit; hit.material = hoverMat; container.style.cursor = "pointer"; }
+    else if (!hit && hoveredMesh) { hoveredMesh.material = hoveredMesh.userData.originalMat; hoveredMesh = null; container.style.cursor = "grab"; }
+    return;
+  }
+  const dx = e.clientX - lastMouseX, dy = e.clientY - lastMouseY;
+  if (Math.abs(e.clientX - dragStartX) > DRAG_THRESHOLD || Math.abs(e.clientY - dragStartY) > DRAG_THRESHOLD) isDragging = true;
+  rotY += dx * 0.010; rotX += dy * 0.010;
+  rotX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotX));
+  lastMouseX = e.clientX; lastMouseY = e.clientY; targetRotX = null; targetRotY = null;
+  if (hoveredMesh) { hoveredMesh.material = hoveredMesh.userData.originalMat; hoveredMesh = null; }
+});
+window.addEventListener("mouseup", e => { if (!isDragging) handleClick(e.clientX, e.clientY); mouseIsDown = false; isDragging = false; if (selectedHubIds.size === 0 && !activePath) autoRotate = true; });
+
+window.addEventListener("wheel", e => {
+  if (e.target.closest("#content-panel")) return;
+  const d = e.deltaMode === 1 ? e.deltaY * 30 : e.deltaMode === 2 ? e.deltaY * 600 : e.deltaY;
+  camera.position.z = Math.max(MIN_Z, Math.min(MAX_Z, camera.position.z + d * 0.05));
+  e.preventDefault();
+}, { passive: false });
+
+// ── TOUCH HANDLING ────────────────────────────────────────────────────────────
+
+let isTouchDragging = false, lastTouchX = 0, lastTouchY = 0;
+let touchStartX = 0, touchStartY = 0, touchStartedInCanvas = false;
+let lastPinchDist = 0, isPinching = false;
+
+function pinchDist(e) {
+  const dx = e.touches[0].clientX - e.touches[1].clientX;
+  const dy = e.touches[0].clientY - e.touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+function touchTargetInCanvas(touch) { return container.contains(touch.target); }
+
+window.addEventListener("touchstart", e => {
+  const t0 = e.touches[0];
+  touchStartedInCanvas = touchTargetInCanvas(t0);
+  if (!touchStartedInCanvas && e.touches.length < 2) return;
+  e.preventDefault();
+  if (e.touches.length >= 2) {
+    const anyInCanvas = Array.from(e.touches).some(t => touchTargetInCanvas(t));
+    if (!anyInCanvas) return;
+    isPinching = true; isTouchDragging = true; lastPinchDist = pinchDist(e); return;
+  }
+  isPinching = false; isTouchDragging = false;
+  lastTouchX = touchStartX = t0.clientX; lastTouchY = touchStartY = t0.clientY; autoRotate = false;
+}, { passive: false });
+
+window.addEventListener("touchmove", e => {
+  if (!touchStartedInCanvas && !isPinching) return;
+  e.preventDefault();
+  if (e.touches.length >= 2) {
+    isPinching = true; isTouchDragging = true;
+    const dist = pinchDist(e);
+    camera.position.z = Math.max(MIN_Z, Math.min(MAX_Z, camera.position.z + (lastPinchDist - dist) * 0.07));
+    lastPinchDist = dist; return;
+  }
+  if (e.touches.length === 1 && !isPinching) {
+    const t = e.touches[0];
+    if (Math.abs(t.clientX - touchStartX) > DRAG_THRESHOLD || Math.abs(t.clientY - touchStartY) > DRAG_THRESHOLD) isTouchDragging = true;
+    const dx = t.clientX - lastTouchX, dy = t.clientY - lastTouchY;
+    rotY += dx * 0.010; rotX += dy * 0.010;
+    rotX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotX));
+    lastTouchX = t.clientX; lastTouchY = t.clientY; targetRotX = null; targetRotY = null;
+  }
+}, { passive: false });
+
+window.addEventListener("touchend", e => {
+  if (e.touches.length < 2) isPinching = false;
+  if (e.touches.length === 0) {
+    const t = e.changedTouches[0];
+    if (!isTouchDragging && touchStartedInCanvas) handleClick(t.clientX, t.clientY);
+    isTouchDragging = false;
+    if (selectedHubIds.size === 0 && !activePath) autoRotate = true;
+  }
+}, { passive: true });
+
+// ── DEPTH FADE ────────────────────────────────────────────────────────────────
+
+const _wp = new THREE.Vector3();
+function updateDepth() {
+  const hasSel = selectedHubIds.size > 0;
+  cLabel.element.style.opacity = hasSel ? "0" : "1";
+  centerMesh.material.opacity = hasSel ? 0.08 : 1.0;
+  allClickable.forEach(({ mesh }) => {
+    if (mesh === hoveredMesh) return;
+    mesh.getWorldPosition(_wp);
+    const t = (_wp.z / SPHERE_R + 1) / 2;
+    if (hasSel) {
+      const show = (mesh.userData.isHub && hasSel && selectedHubIds.has(mesh.userData.data.id)) ||
+                   (!mesh.userData.isHub && selectedHubIds.has(mesh.userData.hubId));
+      mesh.material.opacity = show ? 1.0 : 0.05;
+      if (mesh.userData.labelObj) mesh.userData.labelObj.element.style.opacity = show ? "1" : "0.03";
+    } else {
+      mesh.material.opacity = 0.15 + t * 0.85;
+      if (mesh.userData.labelObj) mesh.userData.labelObj.element.style.opacity = Math.max(0.08, t * 0.9 + 0.08).toFixed(2);
+    }
+  });
+}
+
+function updateRotationAnimation() {
+  if (targetRotX === null || targetRotY === null) return;
+  const LERP = 0.06;
+  rotX += (targetRotX - rotX) * LERP; rotY += (targetRotY - rotY) * LERP;
+  if (Math.abs(rotX - targetRotX) < 0.001 && Math.abs(rotY - targetRotY) < 0.001) { rotX = targetRotX; rotY = targetRotY; targetRotX = null; targetRotY = null; }
+}
+
+function onResize() {
+  const w = W(), h = H(); if (!w || !h) return;
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h); labelRenderer.setSize(w, h);
+}
+window.addEventListener("resize", onResize); setTimeout(onResize, 0); window.addEventListener("load", onResize);
+
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  if (autoRotate) rotY -= 0.0025;
+  updateRotationAnimation();
+  pivot.rotation.y = rotY; pivot.rotation.x = rotX;
+  camera.lookAt(0, 0, 0);
+  limeLight.intensity = 1.8 + Math.sin(clock.getElapsedTime() * 1.2) * 0.2;
+  darkLight.intensity = 1.3 + Math.sin(clock.getElapsedTime() * 0.9 + 1) * 0.2;
+  updateDepth();
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+  // Labels follow sphere surface
+  allClickable.forEach(({ mesh }) => {
+    const el = mesh.userData.labelEl;
+    if (!el) return;
+    const baseT = el.style.transform;
+    if (!baseT) return;
+    const tilt = (Math.sin((mesh.userData.nodePhi || 0) + rotY) * -42).toFixed(1);
+    el.style.transform = `${baseT} perspective(280px) rotateY(${tilt}deg)`;
+  });
+}
+animate();
+
+// ── CONTENT PANEL ─────────────────────────────────────────────────────────────
+
+let currentHubId = null;
+
+function renderContentPanel(hubId) {
+  const data = ATTOOH_CONTENT[hubId];
+  if (!data) { contentPanel.classList.remove("visible"); return; }
+  stopPillSpotlight();
+  document.body.classList.add("panel-open");
+  currentHubId = hubId;
+
+  document.getElementById("cp-step-badge").textContent = data.title;
+  document.getElementById("cp-title").textContent = data.title;
+  document.getElementById("cp-intro").textContent = hubById[hubId]?.tip || "";
+
+  const itemsEl = document.getElementById("cp-items"); itemsEl.innerHTML = "";
+
+  data.items.forEach(item => {
+    const card = document.createElement("div"); card.className = "cp-card";
+    const articlesHtml = item.articles && item.articles.length
+      ? `<div class="cp-articles"><div class="cp-articles-label">Links (${item.articles.length})</div><ul class="cp-article-list">${item.articles.map(a => `<li class="cp-article-item" data-url="${a.url}"><span class="cp-article-dot">›</span><span class="cp-article-title">${a.title}</span></li>`).join("")}</ul></div>` : "";
+    card.innerHTML = `
+      <div class="cp-card-header"><span class="cp-card-icon">${item.icon}</span><div class="cp-card-title">${item.title}</div></div>
+      <div class="cp-card-body">${item.body}</div>
+      ${articlesHtml}`;
+    card.querySelectorAll(".cp-article-item").forEach(li => {
+      li.addEventListener("click", () => {
+        const url = li.dataset.url;
+        if (url) {
+          if (window.SphereAnalytics) window.SphereAnalytics.track('article_clicked', { article_title: li.querySelector('.cp-article-title')?.textContent, hub_id: hubId, hub_label: data.title, url });
+          window.open(url, "_blank");
+        }
+      });
+    });
+    itemsEl.appendChild(card);
+  });
+
+  // Book a meeting CTA at bottom of panel
+  const ctaCard = document.createElement("div"); ctaCard.style.padding = "0 0 16px"; ctaCard.style.textAlign = "center";
+  const ctaBtn = document.createElement("button"); ctaBtn.className = "cp-cta-btn";
+  ctaBtn.textContent = "☕ Book a Free Consultation";
+  ctaBtn.addEventListener("click", () => {
+    if (window.SphereAnalytics) window.SphereAnalytics.track('cta_clicked', { cta: 'book-consultation', hub_id: hubId, hub_label: data.title });
+    window.open(CTA, "_blank");
+  });
+  ctaCard.appendChild(ctaBtn); itemsEl.appendChild(ctaCard);
+
+  contentPanel.classList.add("visible");
+}
+
+function hideContentPanel() {
+  contentPanel.classList.remove("visible");
+  document.body.classList.remove("panel-open");
+}
+
+document.getElementById("cp-admin-toggle").addEventListener("change", e => {
+  document.body.classList.toggle("admin-mode", e.target.checked);
+  if (currentHubId) renderContentPanel(currentHubId);
+});
+
+</script>
+<script src="analytics.js" data-sphere-id="attooh-sphere"></script>
+</body>
+</html>
