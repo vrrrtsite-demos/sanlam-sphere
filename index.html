@@ -699,6 +699,7 @@ const pathDefs = [
   { key: "starting", label: "🌱 Just Starting Out" },
   { key: "business", label: "🏢 I'm a Business Owner" },
 ];
+pathDefs.forEach(({key, label}) => {
   const p = document.createElement("div");
   p.className = "nav-pill path"; p.textContent = label; p.dataset.path = key;
   navBar.appendChild(p);
@@ -1441,6 +1442,6 @@ document.getElementById("cp-admin-toggle").addEventListener("change", e => {
 });
 
 </script>
-<script src="analytics.js" data-sphere-id="attooh-sphere"></script>
+<script src="analytics.js" data-sphere-id="sanlam-sphere"></script>
 </body>
 </html>
