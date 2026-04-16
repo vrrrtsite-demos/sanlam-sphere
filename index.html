@@ -112,7 +112,7 @@
     pointer-events: auto; cursor: pointer;
     will-change: transform;
   }
-  .node-label.hub-a   { color: #2a4e00; background: rgba(255,255,255,0.95); border: 1.5px solid rgba(0,117,201,0.70); box-shadow: 0 2px 6px rgba(0,0,0,0.10); }
+  .node-label.hub-a   { color: #003d7a; background: rgba(255,255,255,0.95); border: 1.5px solid rgba(0,117,201,0.70); box-shadow: 0 2px 6px rgba(0,0,0,0.10); }
   .node-label.hub-b   { color: #012F6B; background: rgba(255,255,255,0.95); border: 1.5px solid rgba(1,81,163,0.55); box-shadow: 0 2px 6px rgba(0,0,0,0.10); }
   .node-label.child-a { font-size: 9px; font-weight: 700; color: #0151A3; background: rgba(255,255,255,0.88); border: 1px solid rgba(0,117,201,0.35); padding: 1px 7px; }
   .node-label.child-b { font-size: 9px; font-weight: 700; color: #0151A3; background: rgba(255,255,255,0.88); border: 1px solid rgba(1,81,163,0.28); padding: 1px 7px; }
@@ -899,7 +899,7 @@ cDiv.className = "node-label hub-a";
 cDiv.style.fontSize = "13px"; cDiv.style.padding = "4px 14px";
 cDiv.style.background = "linear-gradient(135deg, rgba(0,117,201,0.15), rgba(1,81,163,0.12))";
 cDiv.style.border = "1.5px solid rgba(0,117,201,0.55)";
-cDiv.textContent = "attooh!";
+cDiv.textContent = "Sanlam";
 cDiv.addEventListener("click", e => { e.stopPropagation(); activePath ? exitPath() : selectHub("all"); });
 const cLabel = new CSS2DObject(cDiv);
 cLabel.position.set(0, 0.85, 0); pivot.add(cLabel);
@@ -927,7 +927,7 @@ const PATHS = {
   grow:     { label: "Grow My Wealth",      color: "#0151A3", textColor: "#fff",    hubs: ["wealth",    "retirement", "employee",  "education" ] },
   business: { label: "I'm a Business Owner",color: "#0260B8", textColor: "#fff",    hubs: ["business",  "employee",   "estate",    "retirement"] },
   starter:  { label: "Just Starting Out",   color: "#0063AC", textColor: "#fff",    hubs: ["education", "insurance",  "health",    "wealth"    ] },
-  discover: { label: "About attooh!",       color: "#012F6B", textColor: "#0075C9", hubs: ["brand",     "team",       "story",     "values"    ] },
+  retire:   { label: "Plan My Retirement",       color: "#012F6B", textColor: "#0075C9", hubs: ["brand",     "team",       "story",     "values"    ] },
 };
 
 // ── MODE SELECTOR ─────────────────────────────────────────────────────────────
